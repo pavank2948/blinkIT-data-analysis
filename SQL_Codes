@@ -1,0 +1,63 @@
+-- Update Item_Fat_Content based on existing values
+UPDATE sales_Data
+SET Item_Fat_Content = 
+    CASE 
+        WHEN Item_Fat_Content IN ('LF', 'low fat') THEN 'Low Fat'
+        WHEN Item_Fat_Content IN ('reg', 'regular') THEN 'Regular'
+    END;
+
+-- Q1: Total Sales
+SELECT CONCAT(CAST(SUM(total_sales) / 1000000 AS DECIMAL(10, 2)), 'M') AS Total_Sales
+FROM sales_data;
+
+-- Q2: Average Sales
+SELECT CAST(AVG(total_sales) AS DECIMAL(10, 0)) AS avg_sales
+FROM sales_data;
+
+-- Q3: Number of Items
+SELECT COUNT(*) AS no_of_items 
+FROM sales_Data;
+
+-- Q4: Average Rating
+SELECT ROUND(AVG(rating), 2) AS avg_rating 
+FROM sales_Data;
+
+-- Q1: Total Sales by Fat Content
+SELECT Item_Fat_Content,  
+       CONCAT(CAST(SUM(total_sales) / 1000000 AS DECIMAL(10, 2)), ' M') AS sales 
+FROM sales_Data
+GROUP BY Item_Fat_Content
+ORDER BY sales DESC;
+
+-- Q2: Total Sales by Outlet Location Type
+SELECT outlet_location_type,
+       ROUND(SUM(CASE 
+                  WHEN item_fat_content = 'Regular' THEN total_sales 
+                  ELSE 0 
+                 END), 2) AS Regular,
+       ROUND(SUM(CASE 
+                  WHEN item_fat_content = 'Low Fat' THEN total_sales 
+                  ELSE 0 
+                 END), 2) AS Low_Fat
+FROM sales_data
+GROUP BY outlet_location_type;
+
+-- Q2: Total Sales by Outlet Establishment Year
+SELECT Outlet_Establishment_Year, 
+       ROUND(SUM(total_sales), 2) AS sales 
+FROM sales_Data
+GROUP BY Outlet_Establishment_Year
+ORDER BY Outlet_Establishment_Year DESC;
+
+-- Q3: Percentage of Sales by Outlet Size
+SELECT outlet_size,
+       CONCAT(ROUND(SUM(total_sales) * 100 / (SELECT SUM(total_sales) FROM sales_Data), 2), ' %') AS sales
+FROM sales_Data
+GROUP BY Outlet_Size
+ORDER BY sales;
+
+-- Sales by Outlet Location
+SELECT Outlet_Location_Type,
+       ROUND(SUM(total_sales), 2) AS sales 
+FROM sales_Data
+GROUP BY Outlet_Location_Type;
